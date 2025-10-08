@@ -194,7 +194,7 @@ button:active {
 
     <div class="input-group" id="positionSizeGroup" style="display:none;">
       <label for="positionSize">Position Size</label>
-      <input type="range" id="positionSize" min="0" max="50" step="0.5" value="10" />
+      <input type="range" id="positionSize" min="5" max="50" step="5" value="10" />
       <div class="range-value" id="positionSizeVal">10</div>
     </div>
 
@@ -205,10 +205,9 @@ button:active {
 <div id="results" class="results" aria-live="polite"></div>
 <div class="copyright">© 2025 Trade Risk Manager</div>
 <script>
-// Save inputs to localStorage
 const accInputs = [
-  { id: "accSize1" },
-  { id: "accSize2" }
+  { id: "accSize1", label: "Account 1" },
+  { id: "accSize2", label: "Account 2" }
 ];
 
 const equityRiskSlider = document.getElementById("equityRisk");
@@ -220,43 +219,19 @@ const modePositionSize = document.getElementById("modePositionSize");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
 
+// Update slider value display and save inputs
 function saveInputs() {
-  // Save account sizes
   accInputs.forEach(({ id }) => {
     localStorage.setItem(id, document.getElementById(id).value);
   });
-  // Save purchase price and stop loss
   localStorage.setItem('purchasePrice', document.getElementById('purchasePrice').value);
   localStorage.setItem('stopLoss', document.getElementById('stopLoss').value);
-  // Save sliders
   localStorage.setItem('equityRisk', equityRiskSlider.value);
   localStorage.setItem('positionSize', positionSizeSlider.value);
-  // Save mode
   const mode = document.querySelector('input[name="mode"]:checked');
   if (mode) localStorage.setItem('mode', mode.value);
 }
 
-accInputs.forEach(({ id }) => {
-  document.getElementById(id).addEventListener('input', saveInputs);
-});
-document.getElementById('purchasePrice').addEventListener('input', saveInputs);
-document.getElementById('stopLoss').addEventListener('input', saveInputs);
-equityRiskSlider.addEventListener('input', () => {
-  document.getElementById("equityRiskVal").textContent = equityRiskSlider.value;
-  saveInputs();
-});
-positionSizeSlider.addEventListener('input', () => {
-  document.getElementById("positionSizeVal").textContent = positionSizeSlider.value;
-  saveInputs();
-});
-document.querySelectorAll('input[name="mode"]').forEach((input) => {
-  input.addEventListener('change', () => {
-    updateModeView();
-    saveInputs();
-  });
-});
-
-// Load saved inputs
 function loadInputs() {
   accInputs.forEach(({ id }) => {
     const val = localStorage.getItem(id);
@@ -269,12 +244,12 @@ function loadInputs() {
   const eRisk = localStorage.getItem('equityRisk');
   if (eRisk !== null) {
     equityRiskSlider.value = eRisk;
-    document.getElementById("equityRiskVal").textContent = eRisk;
+    equityRiskVal.textContent = eRisk;
   }
   const pSize = localStorage.getItem('positionSize');
   if (pSize !== null) {
     positionSizeSlider.value = pSize;
-    document.getElementById("positionSizeVal").textContent = pSize;
+    positionSizeVal.textContent = pSize;
   }
   const mode = localStorage.getItem('mode');
   if (mode) {
@@ -296,24 +271,54 @@ function updateModeView() {
   }
 }
 
-// Run on page load
+accInputs.forEach(({ id }) => {
+  document.getElementById(id).addEventListener('input', saveInputs);
+});
+document.getElementById('purchasePrice').addEventListener('input', saveInputs);
+document.getElementById('stopLoss').addEventListener('input', saveInputs);
+equityRiskSlider.addEventListener('input', () => {
+  equityRiskVal.textContent = equityRiskSlider.value;
+  saveInputs();
+});
+positionSizeSlider.addEventListener('input', () => {
+  positionSizeVal.textContent = positionSizeSlider.value;
+  saveInputs();
+});
+document.querySelectorAll('input[name="mode"]').forEach((input) => {
+  input.addEventListener('change', () => {
+    updateModeView();
+    saveInputs();
+  });
+});
+
 loadInputs();
 
 function formatNumber(num) {
   return Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function calcRisk(accountSize, purchasePrice, stopLoss, riskMultiplier) {
-  if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || riskMultiplier <= 0) return null;
-  const riskAmount = accountSize * riskMultiplier;
+function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
+  if (accountSize <= 0 || purchasePrice <= 0) return null;
   const riskPerShare = Math.abs(purchasePrice - stopLoss);
-  if (riskPerShare === 0) return null;
-  const positionSize = riskAmount / riskPerShare;
-  const positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
+
+  let riskAmount, positionSize, positionSizePercent;
+  if (mode === "equityRisk") {
+    if (!stopLoss || riskPerShare === 0) return null;
+    riskAmount = accountSize * (riskValue / 100);
+    positionSize = riskAmount / riskPerShare;
+    positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
+  } else if (mode === "positionSize") {
+    positionSizePercent = riskValue;
+    positionSize = (accountSize * riskValue) / 100;
+    riskAmount = positionSize * riskPerShare;
+  } else {
+    return null;
+  }
 
   const direction = purchasePrice > stopLoss ? 1 : -1;
   const twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
   const fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
+
   return {
     riskAmount,
     positionSize,
@@ -323,16 +328,20 @@ function calcRisk(accountSize, purchasePrice, stopLoss, riskMultiplier) {
   };
 }
 
-document.getElementById('riskForm').addEventListener('submit', (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
-  resultsDiv.innerHTML = '';
+  resultsDiv.innerHTML = "";
 
-  const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
-  const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+  const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
+  const stopLoss = parseFloat(document.getElementById("stopLoss").value);
   const mode = document.querySelector('input[name="mode"]:checked')?.value;
 
-  if (!purchasePrice || !stopLoss) {
-    alert('Please enter valid Purchase Price and Stop Location.');
+  if (!purchasePrice) {
+    alert("Please enter valid Purchase Price.");
+    return;
+  }
+  if (mode === "equityRisk" && (!stopLoss || purchasePrice === stopLoss)) {
+    alert("Please enter valid Stop Location for Equity Risk mode.");
     return;
   }
 
@@ -341,35 +350,33 @@ document.getElementById('riskForm').addEventListener('submit', (e) => {
     if (parseFloat(document.getElementById(id).value) > 0) anyAccount = true;
   });
   if (!anyAccount) {
-    alert('Please input at least one account size.');
+    alert("Please input at least one account size.");
     return;
   }
 
-  let equityRiskPercent;
   let displayLabel = '';
-  if (mode === 'equityRisk') {
-    equityRiskPercent = parseFloat(equityRiskSlider.value);
-    displayLabel = `At ${equityRiskPercent}% Equity Risk`;
+  let riskValue;
+  if (mode === "equityRisk") {
+    riskValue = parseFloat(equityRiskSlider.value);
+    displayLabel = `At ${riskValue}% Equity Risk`;
   } else {
-    const targetPositionSizePercent = parseFloat(positionSizeSlider.value);
-    const riskPerShare = Math.abs(purchasePrice - stopLoss);
-    equityRiskPercent = (targetPositionSizePercent * riskPerShare) / purchasePrice * 100;
-    displayLabel = `At ${targetPositionSizePercent}% Position Size / Risk ${equityRiskPercent.toFixed(2)}%`;
+    riskValue = parseFloat(positionSizeSlider.value);
+    displayLabel = `At ${riskValue}% Position Size`;
   }
 
   accInputs.forEach(({ id, label }) => {
     const accSize = parseFloat(document.getElementById(id).value);
     if (accSize > 0) {
-      const res = calcRisk(accSize, purchasePrice, stopLoss, Math.round(equityRiskPercent*100)/100);
+      const res = calcRisk(accSize, purchasePrice, stopLoss, riskValue, mode);
       if (res) {
-        const div = document.createElement('div');
-        div.className = 'result-group';
+        const div = document.createElement("div");
+        div.className = "result-group";
         div.innerHTML = `
           <h3>${label}</h3>
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
           <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
           <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
-          <div class="result-row"><span>% to Stop</span><span>${(Math.abs(purchasePrice - stopLoss) / purchasePrice * 100).toFixed(2)}%</span></div>
+          <div class="result-row"><span>% to Stop</span><span>${mode === "equityRisk" ? (Math.abs(purchasePrice - stopLoss) / purchasePrice * 100).toFixed(2) : "N/A"}%</span></div>
           <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
           <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
           <div class="result-row">${displayLabel}</div>
@@ -380,11 +387,11 @@ document.getElementById('riskForm').addEventListener('submit', (e) => {
   });
 });
 
-document.getElementById('resetBtn').addEventListener('click', () => {
-  document.getElementById('riskForm').reset();
+document.getElementById("resetBtn").addEventListener("click", () => {
+  form.reset();
   loadInputs();
   updateModeView();
-  resultsDiv.innerHTML = '';
+  resultsDiv.innerHTML = "";
 });
 </script>
 </body>
