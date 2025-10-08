@@ -2,147 +2,154 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Trade Risk Manager" />
-<!-- Manifest and icon omitted for brevity -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Trade Risk Manager</title>
 <style>
-  body {
-    background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72);
-    color: #eee;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    padding: 15px;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    touch-action: manipulation;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 1.6rem;
-    color: #fff;
-  }
-  .app-container {
-    max-width: 480px;
-    width: 100%;
-    padding: 12px;
-    background: #121212;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  .account-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .input-group {
-    flex: 1 1 45%;
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  label, [contenteditable="true"] {
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-    color: #fff;
-    cursor: text;
-    display: inline-block;
-    padding: 2px 4px;
-    border-radius: 5px;
-    background: #3a3a3a;
-    border: none;
-  }
-  label:focus, [contenteditable="true"]:focus {
-    outline: none;
-    background: #2a2a2a;
-  }
-  input[type=number] {
-    width: 100%;
-    font-size: 1.1rem;
-    padding: 8px;
-    border-radius: 5px;
-    border: none;
-    background: #2a2a2a;
-    color: #eee;
-    box-sizing: border-box;
-  }
-  input[type=number]:focus {
-    background: #3a3a3a;
-    outline: none;
-  }
-  button {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    touch-action: manipulation;
-    transition: transform 0.2s ease, background 0.3s ease;
-  }
-  button#calculateBtn {
-    background: #34c759;
-    color: #fff;
-  }
-  button#resetBtn {
-    background: #f0f0f0;
-    color: #1e3c72;
-  }
-  button:hover {
-    transform: scale(1.02);
-  }
-  button:active {
-    transform: scale(0.98);
-  }
-  .results {
-    max-width: 480px;
-    margin: 15px 0;
-    background: #2a2a2a;
-    border-radius: 8px;
-    padding: 12px;
-  }
-  .result-group {
-    border-bottom: 1px solid #444;
-    padding: 8px 0;
-  }
-  .result-grouplast-child {
-    border-bottom: none;
-  }
-  .result-group h3 {
-    margin: 0 0 6px 0;
-    font-size: 1.2rem;
-    color: #34c759;
-  }
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1rem;
-    margin-bottom: 4px;
-  }
-  .bold {
-    font-weight: 700;
-  }
-  .copyright {
-    text-align: center;
-    font-size: 1rem;
-    color: #eee;
-    margin-top: 15px;
-    opacity: 0.8;
-  }
+body {
+  background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72);
+  color: #eee;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 15px;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+.app-container {
+  max-width: 480px;
+  width: 100%;
+  padding: 12px;
+  background: #121212;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.account-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.input-group {
+  flex: 1 1 45%;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+label {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: #fff;
+  display: inline-block;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+input[type=number], input[type=range] {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  background: #2a2a2a;
+  color: #eee;
+  box-sizing: border-box;
+  margin-top: 2px;
+}
+input[type=number]:focus, input[type=range]:focus {
+  background: #3a3a3a;
+  outline: none;
+}
+.range-value {
+  font-size: 1rem;
+  color: #eee;
+  margin-top: 4px;
+  text-align: center;
+}
+.mode-group {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+}
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+#calculateBtn {
+  background: #34c759;
+  color: #fff;
+}
+#resetBtn {
+  background: #f0f0f0;
+  color: #1e3c72;
+}
+button:hover {
+  transform: scale(1.02);
+}
+button:active {
+  transform: scale(0.98);
+}
+.results {
+  max-width: 480px;
+  margin: 15px 0;
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 12px;
+}
+.result-group {
+  border-bottom: 1px solid #444;
+  padding: 8px 0;
+}
+.result-group:last-child {
+  border-bottom: none;
+}
+.result-group h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.2rem;
+  color: #34c759;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.bold {
+  font-weight: 700;
+}
+.copyright {
+  text-align: center;
+  font-size: 1rem;
+  color: #eee;
+  margin-top: 15px;
+  opacity: 0.8;
+}
 </style>
 </head>
 <body>
@@ -151,11 +158,11 @@
   <form id="riskForm" novalidate>
     <div class="account-grid">
       <div class="input-group">
-        <label for="accSize1" contenteditable="true" id="labelAcc1" data-default="Account 1">Account 1</label>
+        <label for="accSize1">Account 1</label>
         <input type="number" id="accSize1" min="0" step="0.01" placeholder="Enter account size" inputmode="decimal" />
       </div>
       <div class="input-group">
-        <label for="accSize2" contenteditable="true" id="labelAcc2" data-default="Account 2">Account 2</label>
+        <label for="accSize2">Account 2</label>
         <input type="number" id="accSize2" min="0" step="0.01" placeholder="Enter account size" inputmode="decimal" />
       </div>
     </div>
@@ -195,256 +202,147 @@
     <button type="button" id="resetBtn">Reset</button>
   </form>
 </div>
-
 <div id="results" class="results" aria-live="polite"></div>
-
 <div class="copyright">© 2025 Trade Risk Manager</div>
-
 <script>
-  const accInputs = [
-    { id: 'accSize1', labelId: 'labelAcc1', defaultLabel: 'Account 1' },
-    { id: 'accSize2', labelId: 'labelAcc2', defaultLabel: 'Account 2' }
-  ];
+// Elements
+const accInputs = [
+  { id: "accSize1", label: "Account 1" },
+  { id: "accSize2", label: "Account 2" }
+];
+const equityRiskSlider = document.getElementById("equityRisk");
+const equityRiskVal = document.getElementById("equityRiskVal");
+const positionSizeSlider = document.getElementById("positionSize");
+const positionSizeVal = document.getElementById("positionSizeVal");
+const equityRiskGroup = document.getElementById("equityRiskGroup");
+const positionSizeGroup = document.getElementById("positionSizeGroup");
+const modeEquityRisk = document.getElementById("modeEquityRisk");
+const modePositionSize = document.getElementById("modePositionSize");
+const resultsDiv = document.getElementById("results");
+const form = document.getElementById("riskForm");
 
-  const equityRiskSlider = document.getElementById('equityRisk');
-  const equityRiskVal = document.getElementById('equityRiskVal');
-  const positionSizeSlider = document.getElementById('positionSize');
-  const positionSizeVal = document.getElementById('positionSizeVal');
-  const equityRiskGroup = document.getElementById('equityRiskGroup');
-  const positionSizeGroup = document.getElementById('positionSizeGroup');
-  const modeEquityRisk = document.getElementById('modeEquityRisk');
-  const modePositionSize = document.getElementById('modePositionSize');
-  const resultsDiv = document.getElementById('results');
-  const form = document.getElementById('riskForm');
-
-  if (!form || !equityRiskSlider || !equityRiskVal || !positionSizeSlider || !positionSizeVal || !resultsDiv) {
-    console.error('Form elements not found');
+// Show/hide groups on mode change
+function updateModeView() {
+  if (modeEquityRisk.checked) {
+    equityRiskGroup.style.display = "block";
+    positionSizeGroup.style.display = "none";
+  } else {
+    equityRiskGroup.style.display = "none";
+    positionSizeGroup.style.display = "block";
   }
+}
+// Startup view
+updateModeView();
 
-  // Enhance contenteditable for mobile compatibility
-  accInputs.forEach(({ labelId, defaultLabel }) => {
-    const label = document.getElementById(labelId);
-    label.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      label.focus();
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(label);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    });
+modeEquityRisk.addEventListener("change", updateModeView);
+modePositionSize.addEventListener("change", updateModeView);
 
-    label.addEventListener('input', () => {
-      let text = label.innerText.replace(/
-/g, '');
-      if (text.length > 20) text = text.slice(0, 20);
-      label.innerText = text;
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(label);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      localStorage.setItem(labelId, text);
-    });
+// Show slider values
+equityRiskSlider.addEventListener("input", () => {
+  equityRiskVal.textContent = equityRiskSlider.value;
+});
+positionSizeSlider.addEventListener("input", () => {
+  positionSizeVal.textContent = positionSizeSlider.value;
+});
 
-    label.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        label.blur();
-      }
-    });
-
-    label.addEventListener('blur', () => {
-      let text = label.innerText.trim().replace(/
-/g, '');
-      if (!text) text = label.dataset.default;
-      label.innerText = text;
-      localStorage.setItem(labelId, text);
-    });
+// Format numbers
+function formatNumber(num) {
+  return Number(num).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   });
+}
 
-  equityRiskSlider.addEventListener('input', () => {
-    equityRiskVal.textContent = equityRiskSlider.value;
-  });
+// Risk calculation
+function calcRisk(accountSize, purchasePrice, stopLoss, equityRiskPercent) {
+  if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || equityRiskPercent <= 0) return null;
+  const riskAmount = accountSize * (equityRiskPercent / 100);
+  const riskPerShare = Math.abs(purchasePrice - stopLoss);
+  if (riskPerShare === 0) return null;
+  const positionSize = riskAmount / riskPerShare;
+  const positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
+  const percentToStop = riskPerShare / purchasePrice * 100;
+  const derisk13Price = purchasePrice + (purchasePrice - stopLoss) / 2;
+  const derisk13Shares = Math.floor(positionSize / 3);
+  const derisk14Price = purchasePrice + (purchasePrice - stopLoss) / 4;
+  const derisk14Shares = Math.floor(positionSize / 4);
+  return {
+    riskAmount,
+    positionSize,
+    positionSizePercent,
+    percentToStop,
+    derisk13Price,
+    derisk13Shares,
+    derisk14Price,
+    derisk14Shares
+  };
+}
 
-  positionSizeSlider.addEventListener('input', () => {
-    positionSizeVal.textContent = positionSizeSlider.value;
-  });
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  resultsDiv.innerHTML = "";
+  const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
+  const stopLoss = parseFloat(document.getElementById("stopLoss").value);
+  const mode = document.querySelector('input[name="mode"]:checked')?.value;
 
-  modeEquityRisk.addEventListener('change', () => {
-    equityRiskGroup.style.display = 'block';
-    positionSizeGroup.style.display = 'none';
-  });
-
-  modePositionSize.addEventListener('change', () => {
-    equityRiskGroup.style.display = 'none';
-    positionSizeGroup.style.display = 'block';
-  });
-
-  function formatNumber(num) {
-    return Number(num).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  if (!purchasePrice || !stopLoss) {
+    alert("Please enter valid Purchase Price and Stop Location.");
+    return;
   }
-
-  function calcRisk(accountSize, purchasePrice, stopLoss, equityRiskPercent) {
-    if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || equityRiskPercent <= 0) return null;
-    const riskAmount = accountSize * (equityRiskPercent / 100);
+  let anyAccountFilled = false;
+  for (const { id } of accInputs) {
+    if (parseFloat(document.getElementById(id).value) > 0) {
+      anyAccountFilled = true;
+      break;
+    }
+  }
+  if (!anyAccountFilled) {
+    alert("Please enter at least one Account Size.");
+    return;
+  }
+  let equityRiskPercent;
+  let displayLabel;
+  if (mode === "equityRisk") {
+    equityRiskPercent = parseFloat(equityRiskSlider.value);
+    displayLabel = `At ${equityRiskPercent}% Equity Risk`;
+  } else {
+    const targetPositionSizePercent = parseFloat(positionSizeSlider.value);
     const riskPerShare = Math.abs(purchasePrice - stopLoss);
-    const positionSize = riskAmount / riskPerShare;
-    const positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
-    const percentToStop = Math.abs(purchasePrice - stopLoss) / purchasePrice * 100;
-    const derisk13Price = purchasePrice + (purchasePrice - stopLoss) / 2;
-    const derisk13Shares = Math.floor(positionSize / 3);
-    const derisk14Price = purchasePrice + (purchasePrice - stopLoss) / 4;
-    const derisk14Shares = Math.floor(positionSize / 4);
-    return {
-      riskAmount,
-      positionSize,
-      positionSizePercent,
-      percentToStop,
-      derisk13Price,
-      derisk13Shares,
-      derisk14Price,
-      derisk14Shares
-    };
+    equityRiskPercent = (targetPositionSizePercent * riskPerShare) / purchasePrice * 100;
+    displayLabel = `At ${targetPositionSizePercent}% Position Size / Equity Risk ${equityRiskPercent.toFixed(2)}%`;
   }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    resultsDiv.innerHTML = '';
-
-    const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
-    const stopLoss = parseFloat(document.getElementById('stopLoss').value);
-    const mode = document.querySelector('input[name="mode"]:checked')?.value;
-
-    if (!purchasePrice || !stopLoss) {
-      alert('Please enter valid Purchase Price and Stop Location.');
-      return;
-    }
-
-    if (!mode) {
-      alert('Please select either Equity Risk or Position Size.');
-      return;
-    }
-
-    let anyAccountFilled = false;
-    for (const { id } of accInputs) {
-      if (parseFloat(document.getElementById(id).value) > 0) {
-        anyAccountFilled = true;
-        break;
+  accInputs.forEach(({ id, label }) => {
+    const accSize = parseFloat(document.getElementById(id).value);
+    if (accSize > 0) {
+      const res = calcRisk(accSize, purchasePrice, stopLoss, equityRiskPercent);
+      if (res) {
+        const group = document.createElement("div");
+        group.className = "result-group";
+        group.innerHTML = `
+          <h3>${label}</h3>
+          <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
+          <div class="result-row"><span>Total Position Size</span><span>${formatNumber(res.positionSize)}</span></div>
+          <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
+          <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
+          <div class="result-row"><span>% to Stop</span><span>${res.percentToStop.toFixed(2)}%</span></div>
+          <div class="result-row"><span>De-risk 1/3 at</span><span>${formatNumber(res.derisk13Price)}</span></div>
+          <div class="result-row"><span>Sell Shares 1/3</span><span>${res.derisk13Shares}</span></div>
+          <div class="result-row"><span>De-risk 1/4 at</span><span>${formatNumber(res.derisk14Price)}</span></div>
+          <div class="result-row"><span>Sell Shares 1/4</span><span>${res.derisk14Shares}</span></div>
+          <div class="result-row">${displayLabel}</div>
+        `;
+        resultsDiv.appendChild(group);
       }
     }
-    if (!anyAccountFilled) {
-      alert('Please enter at least one Account Size.');
-      return;
-    }
-
-    let equityRiskPercent;
-    let displayLabel;
-    if (mode === 'equityRisk') {
-      equityRiskPercent = parseFloat(equityRiskSlider.value);
-      displayLabel = `At ${equityRiskPercent}% Equity Risk`;
-    } else {
-      const targetPositionSizePercent = parseFloat(positionSizeSlider.value);
-      const riskPerShare = Math.abs(purchasePrice - stopLoss);
-      equityRiskPercent = (targetPositionSizePercent * riskPerShare) / purchasePrice * 100;
-      displayLabel = `At ${targetPositionSizePercent}% Position Size / Equity Risk ${equityRiskPercent.toFixed(2)}%`;
-    }
-
-    accInputs.forEach(({ id, labelId, defaultLabel }) => {
-      const accSize = parseFloat(document.getElementById(id).value);
-      let accLabel = document.getElementById(labelId).innerText.trim();
-      if (!accLabel) accLabel = defaultLabel;
-
-      if (accSize > 0) {
-        const res = calcRisk(accSize, purchasePrice, stopLoss, equityRiskPercent);
-        if (res) {
-          const group = document.createElement('div');
-          group.className = 'result-group';
-
-          group.innerHTML = `
-            <h3>${accLabel}</h3>
-            <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
-            <div class="result-row"><span>Total Position Size</span><span>${formatNumber(res.positionSize)}</span></div>
-            <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
-            <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
-            <div class="result-row"><span>% to Stop</span><span>${res.percentToStop.toFixed(2)}%</span></div>
-            <div class="result-row"><span>De-risk 1/3 at</span><span>${formatNumber(res.derisk13Price)}</span></div>
-            <div class="result-row"><span>Sell Shares 1/3</span><span>${res.derisk13Shares}</span></div>
-            <div class="result-row"><span>De-risk 1/4 at</span><span>${formatNumber(res.derisk14Price)}</span></div>
-            <div class="result-row"><span>Sell Shares 1/4</span><span>${res.derisk14Shares}</span></div>
-            <div class="result-row">${displayLabel}</div>
-          `;
-          resultsDiv.appendChild(group);
-        }
-      }
-    });
   });
-
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    form.reset();
-    equityRiskVal.textContent = equityRiskSlider.value;
-    positionSizeVal.textContent = positionSizeSlider.value;
-    equityRiskGroup.style.display = 'block';
-    positionSizeGroup.style.display = 'none';
-
-    accInputs.forEach(({ id, labelId, defaultLabel }) => {
-      localStorage.removeItem(id);
-      localStorage.removeItem(labelId);
-      document.getElementById(labelId).innerText = defaultLabel;
-    });
-
-    resultsDiv.innerHTML = '';
-    localStorage.removeItem('purchasePrice');
-    localStorage.removeItem('stopLoss');
-    localStorage.removeItem('equityRisk');
-    localStorage.removeItem('positionSize');
-    localStorage.removeItem('mode');
-  });
-
-  // Load saved data
-  function loadSavedData() {
-    accInputs.forEach(({ id, labelId, defaultLabel }) => {
-      const savedSize = localStorage.getItem(id);
-      if (savedSize) document.getElementById(id).value = savedSize;
-
-      const savedLabel = localStorage.getItem(labelId);
-      if (savedLabel) document.getElementById(labelId).innerText = savedLabel;
-      else document.getElementById(labelId).innerText = defaultLabel;
-    });
-
-    const savedPurchase = localStorage.getItem('purchasePrice');
-    if (savedPurchase) document.getElementById('purchasePrice').value = savedPurchase;
-
-    const savedStop = localStorage.getItem('stopLoss');
-    if (savedStop) document.getElementById('stopLoss').value = savedStop;
-
-    const savedRisk = localStorage.getItem('equityRisk');
-    if (savedRisk) {
-      equityRiskSlider.value = savedRisk;
-      equityRiskVal.textContent = savedRisk;
-    }
-
-    const savedPosition = localStorage.getItem('positionSize');
-    if (savedPosition) {
-      positionSizeSlider.value = savedPosition;
-      positionSizeVal.textContent = savedPosition;
-    }
-
-    const savedMode = localStorage.getItem('mode');
-    if (savedMode) {
-      const modeRadio = document.querySelector(`input[name="mode"][value="${savedMode}"]`);
-      if (modeRadio) modeRadio.checked = true;
-      equityRiskGroup.style.display = savedMode === 'equityRisk' ? 'block' : 'none';
-      positionSizeGroup.style.display = savedMode === 'positionSize' ? 'block' : 'none';
-    }
-  }
-
-  loadSavedData();
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  form.reset();
+  equityRiskVal.textContent = equityRiskSlider.value;
+  positionSizeVal.textContent = positionSizeSlider.value;
+  updateModeView();
+  resultsDiv.innerHTML = "";
+});
 </script>
 </body>
 </html>
