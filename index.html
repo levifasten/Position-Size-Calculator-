@@ -205,138 +205,186 @@ button:active {
 <div id="results" class="results" aria-live="polite"></div>
 <div class="copyright">© 2025 Trade Risk Manager</div>
 <script>
-// Elements
+// Save inputs to localStorage
 const accInputs = [
-  { id: "accSize1", label: "Account 1" },
-  { id: "accSize2", label: "Account 2" }
+  { id: "accSize1" },
+  { id: "accSize2" }
 ];
+
 const equityRiskSlider = document.getElementById("equityRisk");
 const equityRiskVal = document.getElementById("equityRiskVal");
 const positionSizeSlider = document.getElementById("positionSize");
 const positionSizeVal = document.getElementById("positionSizeVal");
-const equityRiskGroup = document.getElementById("equityRiskGroup");
-const positionSizeGroup = document.getElementById("positionSizeGroup");
 const modeEquityRisk = document.getElementById("modeEquityRisk");
 const modePositionSize = document.getElementById("modePositionSize");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
 
-function updateModeView() {
-  if (modeEquityRisk.checked) {
-    equityRiskGroup.style.display = "block";
-    positionSizeGroup.style.display = "none";
-  } else {
-    equityRiskGroup.style.display = "none";
-    positionSizeGroup.style.display = "block";
+function saveInputs() {
+  // Save account sizes
+  accInputs.forEach(({ id }) => {
+    localStorage.setItem(id, document.getElementById(id).value);
+  });
+  // Save purchase price and stop loss
+  localStorage.setItem('purchasePrice', document.getElementById('purchasePrice').value);
+  localStorage.setItem('stopLoss', document.getElementById('stopLoss').value);
+  // Save sliders
+  localStorage.setItem('equityRisk', equityRiskSlider.value);
+  localStorage.setItem('positionSize', positionSizeSlider.value);
+  // Save mode
+  const mode = document.querySelector('input[name="mode"]:checked');
+  if (mode) localStorage.setItem('mode', mode.value);
+}
+
+accInputs.forEach(({ id }) => {
+  document.getElementById(id).addEventListener('input', saveInputs);
+});
+document.getElementById('purchasePrice').addEventListener('input', saveInputs);
+document.getElementById('stopLoss').addEventListener('input', saveInputs);
+equityRiskSlider.addEventListener('input', () => {
+  document.getElementById("equityRiskVal").textContent = equityRiskSlider.value;
+  saveInputs();
+});
+positionSizeSlider.addEventListener('input', () => {
+  document.getElementById("positionSizeVal").textContent = positionSizeSlider.value;
+  saveInputs();
+});
+document.querySelectorAll('input[name="mode"]').forEach((input) => {
+  input.addEventListener('change', () => {
+    updateModeView();
+    saveInputs();
+  });
+});
+
+// Load saved inputs
+function loadInputs() {
+  accInputs.forEach(({ id }) => {
+    const val = localStorage.getItem(id);
+    if (val !== null) document.getElementById(id).value = val;
+  });
+  const pPrice = localStorage.getItem('purchasePrice');
+  if (pPrice !== null) document.getElementById('purchasePrice').value = pPrice;
+  const sLoss = localStorage.getItem('stopLoss');
+  if (sLoss !== null) document.getElementById('stopLoss').value = sLoss;
+  const eRisk = localStorage.getItem('equityRisk');
+  if (eRisk !== null) {
+    equityRiskSlider.value = eRisk;
+    document.getElementById("equityRiskVal").textContent = eRisk;
+  }
+  const pSize = localStorage.getItem('positionSize');
+  if (pSize !== null) {
+    positionSizeSlider.value = pSize;
+    document.getElementById("positionSizeVal").textContent = pSize;
+  }
+  const mode = localStorage.getItem('mode');
+  if (mode) {
+    const selected = document.querySelector(`input[name="mode"][value="${mode}"]`);
+    if (selected) {
+      selected.checked = true;
+      updateModeView();
+    }
   }
 }
-updateModeView();
 
-modeEquityRisk.addEventListener("change", updateModeView);
-modePositionSize.addEventListener("change", updateModeView);
-
-equityRiskSlider.addEventListener("input", () => {
-  equityRiskVal.textContent = equityRiskSlider.value;
-});
-positionSizeSlider.addEventListener("input", () => {
-  positionSizeVal.textContent = positionSizeSlider.value;
-});
-
-function formatNumber(num) {
-  return Number(num).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+function updateModeView() {
+  if (modeEquityRisk.checked) {
+    document.getElementById('equityRiskGroup').style.display = 'block';
+    document.getElementById('positionSizeGroup').style.display = 'none';
+  } else {
+    document.getElementById('equityRiskGroup').style.display = 'none';
+    document.getElementById('positionSizeGroup').style.display = 'block';
+  }
 }
 
-// Calculate 2R and 5R prices for a given entry price, stop loss, and risk multiple
-function calcRisk(accountSize, purchasePrice, stopLoss, equityRiskPercent) {
-  if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || equityRiskPercent <= 0) return null;
-  const riskAmount = accountSize * (equityRiskPercent / 100);
+// Run on page load
+loadInputs();
+
+function formatNumber(num) {
+  return Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calcRisk(accountSize, purchasePrice, stopLoss, riskMultiplier) {
+  if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || riskMultiplier <= 0) return null;
+  const riskAmount = accountSize * riskMultiplier;
   const riskPerShare = Math.abs(purchasePrice - stopLoss);
   if (riskPerShare === 0) return null;
   const positionSize = riskAmount / riskPerShare;
   const positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
-  const percentToStop = riskPerShare / purchasePrice * 100;
-  // Calculate the prices for 2R and 5R profit
-  // 2R: entry + (riskPerShare * 2) if long, entry - (riskPerShare * 2) if short
-  // 5R: entry + (riskPerShare * 5) if long, entry - (riskPerShare * 5) if short
 
-  let direction = (purchasePrice > stopLoss) ? 1 : -1; // 1 = long, -1 = short
+  const direction = purchasePrice > stopLoss ? 1 : -1;
   const twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
   const fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
   return {
     riskAmount,
     positionSize,
     positionSizePercent,
-    percentToStop,
     twoRPrice,
     fiveRPrice
   };
 }
 
-form.addEventListener("submit", (e) => {
+document.getElementById('riskForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  resultsDiv.innerHTML = "";
-  const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
-  const stopLoss = parseFloat(document.getElementById("stopLoss").value);
+  resultsDiv.innerHTML = '';
+
+  const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+  const stopLoss = parseFloat(document.getElementById('stopLoss').value);
   const mode = document.querySelector('input[name="mode"]:checked')?.value;
 
   if (!purchasePrice || !stopLoss) {
-    alert("Please enter valid Purchase Price and Stop Location.");
+    alert('Please enter valid Purchase Price and Stop Location.');
     return;
   }
-  let anyAccountFilled = false;
-  for (const { id } of accInputs) {
-    if (parseFloat(document.getElementById(id).value) > 0) {
-      anyAccountFilled = true;
-      break;
-    }
-  }
-  if (!anyAccountFilled) {
-    alert("Please enter at least one Account Size.");
+
+  let anyAccount = false;
+  accInputs.forEach(({ id }) => {
+    if (parseFloat(document.getElementById(id).value) > 0) anyAccount = true;
+  });
+  if (!anyAccount) {
+    alert('Please input at least one account size.');
     return;
   }
+
   let equityRiskPercent;
-  let displayLabel;
-  if (mode === "equityRisk") {
+  let displayLabel = '';
+  if (mode === 'equityRisk') {
     equityRiskPercent = parseFloat(equityRiskSlider.value);
     displayLabel = `At ${equityRiskPercent}% Equity Risk`;
   } else {
     const targetPositionSizePercent = parseFloat(positionSizeSlider.value);
     const riskPerShare = Math.abs(purchasePrice - stopLoss);
     equityRiskPercent = (targetPositionSizePercent * riskPerShare) / purchasePrice * 100;
-    displayLabel = `At ${targetPositionSizePercent}% Position Size / Equity Risk ${equityRiskPercent.toFixed(2)}%`;
+    displayLabel = `At ${targetPositionSizePercent}% Position Size / Risk ${equityRiskPercent.toFixed(2)}%`;
   }
+
   accInputs.forEach(({ id, label }) => {
     const accSize = parseFloat(document.getElementById(id).value);
     if (accSize > 0) {
-      const res = calcRisk(accSize, purchasePrice, stopLoss, equityRiskPercent);
+      const res = calcRisk(accSize, purchasePrice, stopLoss, Math.round(equityRiskPercent*100)/100);
       if (res) {
-        const group = document.createElement("div");
-        group.className = "result-group";
-        group.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'result-group';
+        div.innerHTML = `
           <h3>${label}</h3>
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
           <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
           <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
-          <div class="result-row"><span>% to Stop</span><span>${res.percentToStop.toFixed(2)}%</span></div>
+          <div class="result-row"><span>% to Stop</span><span>${(Math.abs(purchasePrice - stopLoss) / purchasePrice * 100).toFixed(2)}%</span></div>
           <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
           <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
           <div class="result-row">${displayLabel}</div>
         `;
-        resultsDiv.appendChild(group);
+        resultsDiv.appendChild(div);
       }
     }
   });
 });
 
-document.getElementById("resetBtn").addEventListener("click", () => {
-  form.reset();
-  equityRiskVal.textContent = equityRiskSlider.value;
-  positionSizeVal.textContent = positionSizeSlider.value;
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('riskForm').reset();
+  loadInputs();
   updateModeView();
-  resultsDiv.innerHTML = "";
+  resultsDiv.innerHTML = '';
 });
 </script>
 </body>
