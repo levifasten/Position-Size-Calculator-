@@ -6,9 +6,29 @@
 <title>Trade Risk Manager</title>
 <link rel="manifest" href="manifest.json" />
 <style>
-/* [styles unchanged - same as previous versions] */
 body { background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72); color: #eee; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-/* rest of styles ... */
+h1 { text-align: center; margin-bottom: 15px; font-size: 1.6rem; color: #fff; }
+.app-container { max-width: 480px; width: 100%; padding: 12px; background: #121212; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+form { display: flex; flex-direction: column; gap: 15px; }
+.account-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.input-group { flex: 1 1 45%; min-width: 140px; display: flex; flex-direction: column; gap: 4px; }
+label { font-size: 1.1rem; margin-bottom: 4px; color: #fff; display: inline-block; padding: 0; background: transparent; border: none; }
+input[type=number], input[type=range] { width: 100%; font-size: 1.1rem; padding: 8px; border-radius: 5px; border: none; background: #2a2a2a; color: #eee; box-sizing: border-box; margin-top: 2px; }
+input[type=number]:focus, input[type=range]:focus { background: #3a3a3a; outline: none; }
+.range-value { font-size: 1rem; color: #eee; margin-top: 4px; text-align: center; }
+.mode-group { display: flex; flex-direction: row; gap: 15px; align-items: center; justify-content: center; }
+.mode-option { display: flex; align-items: center; gap: 6px; }
+button { width: 100%; padding: 12px; font-size: 1.2rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; user-select: none; transition: transform 0.2s ease, background 0.3s ease; }
+#calculateBtn { background: #34c759; color: #fff; }
+#resetBtn { background: #f0f0f0; color: #1e3c72; }
+button:hover { transform: scale(1.02); }
+button:active { transform: scale(0.98); }
+.results { max-width: 480px; margin: 15px 0; background: #2a2a2a; border-radius: 8px; padding: 12px; }
+.result-group { border-bottom: 1px solid #444; padding: 8px 0; }
+.result-group:last-child { border-bottom: none; }
+.result-group h3 { margin: 0 0 6px 0; font-size: 1.2rem; color: #34c759; }
+.result-row { display: flex; justify-content: space-between; font-size: 1rem; margin-bottom: 4px; }
+.bold { font-weight: 700; }
 </style>
 </head>
 <body>
@@ -84,7 +104,6 @@ const fixedDollarRiskGroup = document.getElementById("fixedDollarRiskGroup");
 const positionSizeGroup = document.getElementById("positionSizeGroup");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
-
 function saveInputs() {
   accInputs.forEach(({ id }) => {
     localStorage.setItem(id, document.getElementById(id).value);
@@ -97,7 +116,6 @@ function saveInputs() {
   const mode = document.querySelector('input[name="mode"]:checked');
   if (mode) localStorage.setItem('mode', mode.value);
 }
-
 function loadInputs() {
   accInputs.forEach(({ id }) => {
     const val = localStorage.getItem(id);
@@ -164,14 +182,12 @@ document.querySelectorAll('input[name="mode"]').forEach((input) => {
   });
 });
 loadInputs();
-
 function formatNumber(num) {
   return Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
   const direction = purchasePrice > stopLoss ? 1 : -1;
   let twoRPrice = 0, fiveRPrice = 0, moneyAtRisk = 0, sharesToBuy = 0, positionSizeDollar = 0, percentToStop = 0;
-
   if (mode === "equityRisk") {
     const riskPerShare = Math.abs(purchasePrice - stopLoss);
     if (!stopLoss || riskPerShare === 0) return null;
@@ -203,7 +219,6 @@ function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
   } else {
     return null;
   }
-
   return {
     riskAmount: moneyAtRisk,
     positionSizeDollar: positionSizeDollar,
@@ -213,15 +228,12 @@ function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
     fiveRPrice
   };
 }
-
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   resultsDiv.innerHTML = "";
-
   const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
   const stopLoss = parseFloat(document.getElementById("stopLoss").value);
   const mode = document.querySelector('input[name="mode"]:checked')?.value;
-
   if (!purchasePrice) {
     alert("Please enter valid Purchase Price.");
     return;
