@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Trade Risk Manager</title>
+<title>Position Size Calculator</title>
 <link rel="manifest" href="manifest.json" />
 <style>
 body { background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72); color: #eee; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 h1 { text-align: center; margin-bottom: 15px; font-size: 1.6rem; color: #fff; }
-.app-container { max-width: 480px; width: 100%; padding: 12px; background: #121212; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+.app-container { max-width: 480px; width: 100%; padding: 12px; background: #121212; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 form { display: flex; flex-direction: column; gap: 15px; }
 .account-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
 .input-group { flex: 1 1 45%; min-width: 140px; display: flex; flex-direction: column; gap: 4px; }
@@ -32,7 +32,7 @@ button:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
-<h1>Trade Risk Manager</h1>
+<h1>Position Size Calculator</h1>
 <div class="app-container">
   <form id="riskForm" novalidate>
     <div class="account-grid">
@@ -105,9 +105,7 @@ const positionSizeGroup = document.getElementById("positionSizeGroup");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
 function saveInputs() {
-  accInputs.forEach(({ id }) => {
-    localStorage.setItem(id, document.getElementById(id).value);
-  });
+  accInputs.forEach(({ id }) => { localStorage.setItem(id, document.getElementById(id).value); });
   localStorage.setItem('purchasePrice', document.getElementById('purchasePrice').value);
   localStorage.setItem('stopLoss', document.getElementById('stopLoss').value);
   localStorage.setItem('equityRisk', equityRiskSlider.value);
@@ -161,25 +159,14 @@ function updateModeView() {
     positionSizeGroup.style.display = 'block';
   }
 }
-accInputs.forEach(({ id }) => {
-  document.getElementById(id).addEventListener('input', saveInputs);
-});
+accInputs.forEach(({ id }) => { document.getElementById(id).addEventListener('input', saveInputs); });
 document.getElementById('purchasePrice').addEventListener('input', saveInputs);
 document.getElementById('stopLoss').addEventListener('input', saveInputs);
-equityRiskSlider.addEventListener('input', () => {
-  equityRiskVal.textContent = equityRiskSlider.value;
-  saveInputs();
-});
+equityRiskSlider.addEventListener('input', () => { equityRiskVal.textContent = equityRiskSlider.value; saveInputs(); });
 fixedDollarRisk.addEventListener('input', saveInputs);
-positionSizeSlider.addEventListener('input', () => {
-  positionSizeVal.textContent = positionSizeSlider.value;
-  saveInputs();
-});
+positionSizeSlider.addEventListener('input', () => { positionSizeVal.textContent = positionSizeSlider.value; saveInputs(); });
 document.querySelectorAll('input[name="mode"]').forEach((input) => {
-  input.addEventListener('change', () => {
-    updateModeView();
-    saveInputs();
-  });
+  input.addEventListener('change', () => { updateModeView(); saveInputs(); });
 });
 loadInputs();
 function formatNumber(num) {
@@ -234,10 +221,7 @@ form.addEventListener("submit", (e) => {
   const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
   const stopLoss = parseFloat(document.getElementById("stopLoss").value);
   const mode = document.querySelector('input[name="mode"]:checked')?.value;
-  if (!purchasePrice) {
-    alert("Please enter valid Purchase Price.");
-    return;
-  }
+  if (!purchasePrice) { alert("Please enter valid Purchase Price."); return; }
   if ((mode === "equityRisk" || mode === "fixedDollarRisk") && (!stopLoss || purchasePrice === stopLoss)) {
     alert("Please enter valid Stop Location.");
     return;
@@ -250,12 +234,8 @@ form.addEventListener("submit", (e) => {
   accInputs.forEach(({ id }) => {
     if (parseFloat(document.getElementById(id).value) > 0) anyAccount = true;
   });
-  if (!anyAccount) {
-    alert("Please input at least one account size.");
-    return;
-  }
-  let displayLabel = '';
-  let riskValue;
+  if (!anyAccount) { alert("Please input at least one account size."); return; }
+  let displayLabel = '', riskValue;
   if (mode === "equityRisk") {
     riskValue = parseFloat(equityRiskSlider.value);
     displayLabel = `At ${riskValue}% Equity Risk`;
@@ -273,16 +253,15 @@ form.addEventListener("submit", (e) => {
       if (res) {
         const div = document.createElement("div");
         div.className = "result-group";
-        div.innerHTML = `
-          <h3>${label}</h3>
+        div.innerHTML =
+          `<h3>${label}</h3>
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
           <div class="result-row"><span>Position Size $</span><span>${formatNumber(res.positionSizeDollar)}</span></div>
           <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.sharesToBuy)}</span></div>
           <div class="result-row"><span>% to Stop</span><span>${res.percentToStop > 0 ? res.percentToStop.toFixed(2) : "N/A"}%</span></div>
           <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
           <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
-          <div class="result-row">${displayLabel}</div>
-        `;
+          <div class="result-row">${displayLabel}</div>`;
         resultsDiv.appendChild(div);
       }
     }
@@ -294,7 +273,6 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
   updateModeView();
   resultsDiv.innerHTML = "";
 });
-// Service Worker registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(registration => {
