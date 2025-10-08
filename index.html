@@ -187,13 +187,13 @@ button:active {
     </div>
 
     <div class="input-group" id="equityRiskGroup">
-      <label for="equityRisk">Equity Risk 0.05 - 2, step 0.05</label>
+      <label for="equityRisk">Equity Risk</label>
       <input type="range" id="equityRisk" min="0.05" max="2" step="0.05" value="0.25" />
       <div class="range-value" id="equityRiskVal">0.25</div>
     </div>
 
     <div class="input-group" id="positionSizeGroup" style="display:none;">
-      <label for="positionSize">Position Size 0 - 50, step 0.5</label>
+      <label for="positionSize">Position Size</label>
       <input type="range" id="positionSize" min="0" max="50" step="0.5" value="10" />
       <div class="range-value" id="positionSizeVal">10</div>
     </div>
@@ -221,7 +221,6 @@ const modePositionSize = document.getElementById("modePositionSize");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
 
-// Show/hide groups on mode change
 function updateModeView() {
   if (modeEquityRisk.checked) {
     equityRiskGroup.style.display = "block";
@@ -231,13 +230,11 @@ function updateModeView() {
     positionSizeGroup.style.display = "block";
   }
 }
-// Startup view
 updateModeView();
 
 modeEquityRisk.addEventListener("change", updateModeView);
 modePositionSize.addEventListener("change", updateModeView);
 
-// Show slider values
 equityRiskSlider.addEventListener("input", () => {
   equityRiskVal.textContent = equityRiskSlider.value;
 });
@@ -245,7 +242,6 @@ positionSizeSlider.addEventListener("input", () => {
   positionSizeVal.textContent = positionSizeSlider.value;
 });
 
-// Format numbers
 function formatNumber(num) {
   return Number(num).toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -253,7 +249,7 @@ function formatNumber(num) {
   });
 }
 
-// Risk calculation
+// Calculate 2R and 5R prices for a given entry price, stop loss, and risk multiple
 function calcRisk(accountSize, purchasePrice, stopLoss, equityRiskPercent) {
   if (accountSize <= 0 || purchasePrice <= 0 || stopLoss <= 0 || equityRiskPercent <= 0) return null;
   const riskAmount = accountSize * (equityRiskPercent / 100);
@@ -262,19 +258,20 @@ function calcRisk(accountSize, purchasePrice, stopLoss, equityRiskPercent) {
   const positionSize = riskAmount / riskPerShare;
   const positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
   const percentToStop = riskPerShare / purchasePrice * 100;
-  const derisk13Price = purchasePrice + (purchasePrice - stopLoss) / 2;
-  const derisk13Shares = Math.floor(positionSize / 3);
-  const derisk14Price = purchasePrice + (purchasePrice - stopLoss) / 4;
-  const derisk14Shares = Math.floor(positionSize / 4);
+  // Calculate the prices for 2R and 5R profit
+  // 2R: entry + (riskPerShare * 2) if long, entry - (riskPerShare * 2) if short
+  // 5R: entry + (riskPerShare * 5) if long, entry - (riskPerShare * 5) if short
+
+  let direction = (purchasePrice > stopLoss) ? 1 : -1; // 1 = long, -1 = short
+  const twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
+  const fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
   return {
     riskAmount,
     positionSize,
     positionSizePercent,
     percentToStop,
-    derisk13Price,
-    derisk13Shares,
-    derisk14Price,
-    derisk14Shares
+    twoRPrice,
+    fiveRPrice
   };
 }
 
@@ -321,14 +318,11 @@ form.addEventListener("submit", (e) => {
         group.innerHTML = `
           <h3>${label}</h3>
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
-          <div class="result-row"><span>Total Position Size</span><span>${formatNumber(res.positionSize)}</span></div>
           <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
           <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
           <div class="result-row"><span>% to Stop</span><span>${res.percentToStop.toFixed(2)}%</span></div>
-          <div class="result-row"><span>De-risk 1/3 at</span><span>${formatNumber(res.derisk13Price)}</span></div>
-          <div class="result-row"><span>Sell Shares 1/3</span><span>${res.derisk13Shares}</span></div>
-          <div class="result-row"><span>De-risk 1/4 at</span><span>${formatNumber(res.derisk14Price)}</span></div>
-          <div class="result-row"><span>Sell Shares 1/4</span><span>${res.derisk14Shares}</span></div>
+          <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
+          <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
           <div class="result-row">${displayLabel}</div>
         `;
         resultsDiv.appendChild(group);
@@ -336,6 +330,7 @@ form.addEventListener("submit", (e) => {
     }
   });
 });
+
 document.getElementById("resetBtn").addEventListener("click", () => {
   form.reset();
   equityRiskVal.textContent = equityRiskSlider.value;
