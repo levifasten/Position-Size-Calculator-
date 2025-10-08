@@ -4,7 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Trade Risk Manager</title>
+<link rel="manifest" href="manifest.json" />
 <style>
+/* Same styles as previously provided... */
 body {
   background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72);
   color: #eee;
@@ -204,6 +206,7 @@ button:active {
 </div>
 <div id="results" class="results" aria-live="polite"></div>
 <div class="copyright">© 2025 Trade Risk Manager</div>
+
 <script>
 const accInputs = [
   { id: "accSize1", label: "Account 1" },
@@ -387,12 +390,23 @@ form.addEventListener("submit", (e) => {
   });
 });
 
-document.getElementById("resetBtn").addEventListener("click", () => {
+document.querySelector("#resetBtn").addEventListener("click", () => {
   form.reset();
   loadInputs();
   updateModeView();
   resultsDiv.innerHTML = "";
 });
+
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(registration => {
+      console.log('Service Worker registered with scope:', registration.scope);
+    }).catch(error => {
+      console.error('Service Worker registration failed:', error);
+    });
+  });
+}
 </script>
 </body>
 </html>
