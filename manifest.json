@@ -1,0 +1,9 @@
+{
+  "name": "Trade Risk Manager",
+  "short_name": "RiskManager",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#1e3c72",
+  "icons": []
+}
