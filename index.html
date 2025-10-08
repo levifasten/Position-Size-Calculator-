@@ -6,7 +6,6 @@
 <title>Trade Risk Manager</title>
 <link rel="manifest" href="manifest.json" />
 <style>
-/* Same styles as previously provided... */
 body {
   background: linear-gradient(135deg, #1e3c72, #2a5298, #4b3f72);
   color: #eee;
@@ -145,13 +144,6 @@ button:active {
 .bold {
   font-weight: 700;
 }
-.copyright {
-  text-align: center;
-  font-size: 1rem;
-  color: #eee;
-  margin-top: 15px;
-  opacity: 0.8;
-}
 </style>
 </head>
 <body>
@@ -205,7 +197,6 @@ button:active {
   </form>
 </div>
 <div id="results" class="results" aria-live="polite"></div>
-<div class="copyright">© 2025 Trade Risk Manager</div>
 
 <script>
 const accInputs = [
@@ -222,7 +213,6 @@ const modePositionSize = document.getElementById("modePositionSize");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
 
-// Update slider value display and save inputs
 function saveInputs() {
   accInputs.forEach(({ id }) => {
     localStorage.setItem(id, document.getElementById(id).value);
@@ -301,33 +291,45 @@ function formatNumber(num) {
 }
 
 function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
-  if (accountSize <= 0 || purchasePrice <= 0) return null;
-  const riskPerShare = Math.abs(purchasePrice - stopLoss);
+  const direction = purchasePrice > stopLoss ? 1 : -1;
+  let twoRPrice = 0;
+  let fiveRPrice = 0;
+  let moneyAtRisk = 0;
+  let sharesToBuy = 0;
+  let positionSizePercent = 0;
+  let percentToStop = 0;
 
-  let riskAmount, positionSize, positionSizePercent;
   if (mode === "equityRisk") {
+    const riskPerShare = Math.abs(purchasePrice - stopLoss);
     if (!stopLoss || riskPerShare === 0) return null;
-    riskAmount = accountSize * (riskValue / 100);
-    positionSize = riskAmount / riskPerShare;
-    positionSizePercent = (positionSize * purchasePrice) / accountSize * 100;
+
+    moneyAtRisk = accountSize * (riskValue / 100);
+    sharesToBuy = moneyAtRisk / riskPerShare;
+    positionSizePercent = (sharesToBuy * purchasePrice) / accountSize * 100;
+    percentToStop = (riskPerShare / purchasePrice) * 100;
+    twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
+    fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
   } else if (mode === "positionSize") {
+    sharesToBuy = (accountSize * riskValue) / purchasePrice;
+    percentToStop = stopLoss > 0 ? (Math.abs(purchasePrice - stopLoss) / purchasePrice) * 100 : 0;
+    moneyAtRisk = sharesToBuy * Math.abs(purchasePrice - stopLoss);
     positionSizePercent = riskValue;
-    positionSize = (accountSize * riskValue) / 100;
-    riskAmount = positionSize * riskPerShare;
+    if (stopLoss > 0) {
+      const riskPerShare = Math.abs(purchasePrice - stopLoss);
+      twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
+      fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
+    }
   } else {
     return null;
   }
 
-  const direction = purchasePrice > stopLoss ? 1 : -1;
-  const twoRPrice = purchasePrice + (riskPerShare * 2 * direction);
-  const fiveRPrice = purchasePrice + (riskPerShare * 5 * direction);
-
   return {
-    riskAmount,
-    positionSize,
-    positionSizePercent,
+    riskAmount: moneyAtRisk,
+    positionSize: sharesToBuy,
+    positionSizePercent: positionSizePercent,
+    percentToStop: percentToStop,
     twoRPrice,
-    fiveRPrice
+    fiveRPrice,
   };
 }
 
@@ -379,7 +381,7 @@ form.addEventListener("submit", (e) => {
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
           <div class="result-row"><span>Position Size %</span><span>${res.positionSizePercent.toFixed(2)}%</span></div>
           <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.positionSize)}</span></div>
-          <div class="result-row"><span>% to Stop</span><span>${mode === "equityRisk" ? (Math.abs(purchasePrice - stopLoss) / purchasePrice * 100).toFixed(2) : "N/A"}%</span></div>
+          <div class="result-row"><span>% to Stop</span><span>${mode === "equityRisk" ? res.percentToStop.toFixed(2) : res.percentToStop > 0 ? res.percentToStop.toFixed(2) : "N/A"}%</span></div>
           <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
           <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
           <div class="result-row">${displayLabel}</div>
