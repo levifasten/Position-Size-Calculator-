@@ -104,6 +104,7 @@ const fixedDollarRiskGroup = document.getElementById("fixedDollarRiskGroup");
 const positionSizeGroup = document.getElementById("positionSizeGroup");
 const resultsDiv = document.getElementById("results");
 const form = document.getElementById("riskForm");
+
 function saveInputs() {
   accInputs.forEach(({ id }) => { localStorage.setItem(id, document.getElementById(id).value); });
   localStorage.setItem('purchasePrice', document.getElementById('purchasePrice').value);
@@ -206,6 +207,8 @@ function calcRisk(accountSize, purchasePrice, stopLoss, riskValue, mode) {
   } else {
     return null;
   }
+  // Rounding sharesToBuy to the nearest integer for display
+  sharesToBuy = Math.round(sharesToBuy);
   return {
     riskAmount: moneyAtRisk,
     positionSizeDollar: positionSizeDollar,
@@ -257,7 +260,7 @@ form.addEventListener("submit", (e) => {
           `<h3>${label}</h3>
           <div class="result-row"><span>Money at Risk</span><span>${formatNumber(res.riskAmount)}</span></div>
           <div class="result-row"><span>Position Size $</span><span>${formatNumber(res.positionSizeDollar)}</span></div>
-          <div class="result-row"><span>Shares to Buy</span><span class="bold">${formatNumber(res.sharesToBuy)}</span></div>
+          <div class="result-row"><span>Shares to Buy</span><span class="bold">${res.sharesToBuy}</span></div>
           <div class="result-row"><span>% to Stop</span><span>${res.percentToStop > 0 ? res.percentToStop.toFixed(2) : "N/A"}%</span></div>
           <div class="result-row"><span>2R Price</span><span>${formatNumber(res.twoRPrice)}</span></div>
           <div class="result-row"><span>5R Price</span><span>${formatNumber(res.fiveRPrice)}</span></div>
